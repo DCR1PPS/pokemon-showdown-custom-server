@@ -34,6 +34,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -85,6 +86,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen9',
+		searchShow: false,
 		ruleset: ['Standard', 'Sleep Moves Clause', '!Sleep Clause Mod'],
 		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Sand Veil', 'Shadow Tag', 'Snow Cloak', 'King\'s Rock', 'Razor Fang', 'Baton Pass', 'Last Respects', 'Shed Tail'],
 	},
@@ -234,6 +236,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Standard Doubles'],
 		banlist: ['DUber', 'Shadow Tag'],
 	},
@@ -2272,6 +2275,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen9',
+		searchShow: false,
 		ruleset: ['Standard NatDex', 'OHKO Clause', 'Evasion Clause', 'Species Clause', 'Sleep Clause Mod'],
 		banlist: [
 			'ND Uber', 'ND AG', 'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'King\'s Rock',
@@ -2310,7 +2314,6 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen9',
-		searchShow: false,
 		ruleset: ['[Gen 9] National Dex UU'],
 		banlist: ['ND UU', 'ND RUBL', 'Slowbro-Base + Slowbronite', 'Heat Rock'],
 	},
@@ -2376,7 +2379,6 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen9',
-		searchShow: false,
 		ruleset: ['Standard NatDex'],
 	},
 	{
@@ -2423,6 +2425,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen8',
+		searchShow: false,
 		ruleset: ['Standard NatDex', 'OHKO Clause', 'Evasion Clause', 'Species Clause', 'Dynamax Clause', 'Sleep Clause Mod'],
 		banlist: ['ND Uber', 'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'King\'s Rock', 'Razor Fang', 'Quick Claw', 'Baton Pass'],
 	},
@@ -2435,7 +2438,6 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen8',
-		searchShow: false,
 		ruleset: ['[Gen 8] National Dex'],
 		banlist: ['ND OU', 'ND UUBL', 'Drizzle', 'Drought', 'Light Clay', 'Slowbronite'],
 	},
@@ -2446,7 +2448,6 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen8',
-		searchShow: false,
 		ruleset: ['Standard NatDex', 'Same Type Clause', 'Species Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Evasion Items Clause', 'Dynamax Clause', 'Sleep Clause Mod'],
 		banlist: [
 			'Arceus', 'Blastoise-Mega', 'Blaziken', 'Blaziken-Mega', 'Calyrex-Ice', 'Calyrex-Shadow', 'Darkrai', 'Deoxys-Base', 'Deoxys-Attack', 'Dialga', 'Dracovish',
@@ -2550,6 +2551,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Same Type Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -2558,6 +2560,7 @@ export const Formats: FormatList = [
 
 		mod: 'sharedpower',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['[Gen 9] Random Battle', 'Team Preview', 'Camomons Mod', 'Inverse Mod', 'Scalemons Mod'],
 		onValidateRule() {
 			if (this.format.gameType !== 'singles') {
@@ -2597,6 +2600,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'computerGenerated',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -2605,6 +2609,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'randomHC',
+		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['CAP', 'LGPE', 'MissingNo.', 'Pikachu-Cosplay', 'Pichu-Spiky-eared', 'Pokestar Smeargle', 'Pokestar UFO', 'Pokestar UFO-2', 'Pokestar Brycen-Man', 'Pokestar MT', 'Pokestar MT2', 'Pokestar Transport', 'Pokestar Giant', 'Pokestar Humanoid', 'Pokestar Monster', 'Pokestar F-00', 'Pokestar F-002', 'Pokestar Spirit', 'Pokestar Black Door', 'Pokestar White Door', 'Pokestar Black Belt', 'Pokestar UFO-PropU2', 'Xerneas-Base'],
 		unbanlist: ['All Pokemon'],
@@ -2739,6 +2744,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'randomCC',
+		searchShow: false,
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Terastal Clause', 'Picked Team Size = 1'],
 	},
 	{
@@ -2747,6 +2753,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		team: 'randomCC',
+		searchShow: false,
 		gameType: 'doubles',
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Picked Team Size = 2'],
 	},
@@ -2767,6 +2774,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen9',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Max Team Size = 2', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: [
 			'Pokestar Spirit', 'Terapagos', 'Shedinja + Sturdy', 'Cheek Pouch', 'Commander', 'Cursed Body', 'Dry Skin', 'Earth Eater', 'Fur Coat', 'Gorilla Tactics',
@@ -2810,6 +2818,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen8',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -2818,6 +2827,7 @@ export const Formats: FormatList = [
 		mod: 'gen8',
 		gameType: 'doubles',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -2826,7 +2836,7 @@ export const Formats: FormatList = [
 		mod: 'gen8',
 		team: 'random',
 		gameType: 'freeforall',
-		// searchShow: false,
+		searchShow: false,
 		tournamentShow: false,
 		rated: false,
 		ruleset: ['Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Illusion Level Mod'],
@@ -2851,6 +2861,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen8',
 		team: 'randomFactory',
+		searchShow: false,
 		ruleset: ['Standard', 'Dynamax Clause'],
 		onBegin() {
 			this.add(`raw|<div class="broadcast-blue"><b>Battle Factory Tier: ${this.teamGenerator.factoryTier}</b></div>`);
@@ -2874,6 +2885,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen8',
 		team: 'randomHC',
+		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Nonexistent'],
 	},
@@ -2965,6 +2977,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -2973,6 +2986,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		team: 'randomFactory',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
 		onBegin() {
 			this.add(`raw|<div class="broadcast-blue"><b>Battle Factory Tier: ${this.teamGenerator.factoryTier}</b></div>`);
@@ -3013,6 +3027,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen6',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -3033,6 +3048,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen5',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Illusion Level Mod'],
 	},
 	{
@@ -3040,6 +3056,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen4',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Obtainable', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -3047,6 +3064,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen3',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Standard'],
 	},
 	{
@@ -3054,6 +3072,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen2',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Standard'],
 	},
 	{
@@ -3061,6 +3080,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen1',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Standard'],
 	},
 	{
@@ -3157,6 +3177,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen8',
+		searchShow: false,
 		ruleset: ['Standard', 'Dynamax Clause'],
 		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Power Construct', 'Sand Veil', 'Shadow Tag', 'Snow Cloak', 'King\'s Rock', 'Baton Pass'],
 	},
@@ -3169,6 +3190,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Standard'],
 		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
 	},
@@ -3181,6 +3203,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen6',
+		searchShow: false,
 		ruleset: ['Standard', 'Swagger Clause'],
 		banlist: ['Uber', 'Arena Trap', 'Shadow Tag', 'Soul Dew', 'Baton Pass'],
 	},
@@ -3193,6 +3216,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen5',
+		searchShow: false,
 		ruleset: ['Standard', 'Evasion Abilities Clause', 'Sleep Moves Clause', 'Swagger Clause', 'Gems Clause', 'Baton Pass Stat Clause'],
 		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Shadow Tag', 'King\'s Rock', 'Razor Fang', 'Soul Dew', 'Acupressure', 'Assist'],
 	},
@@ -3205,6 +3229,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen4',
+		searchShow: false,
 		ruleset: ['Standard', 'Evasion Abilities Clause', 'Baton Pass Stat Trap Clause', 'Freeze Clause Mod'],
 		banlist: ['AG', 'Uber', 'Arena Trap', 'Quick Claw', 'Soul Dew', 'Swagger'],
 	},
@@ -3217,6 +3242,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen3',
+		searchShow: false,
 		ruleset: ['Standard', 'One Boost Passer Clause', 'Freeze Clause Mod'],
 		banlist: ['Uber', 'Smeargle + Ingrain', 'Sand Veil', 'Soundproof', 'Assist', 'Baton Pass + Block', 'Baton Pass + Mean Look', 'Baton Pass + Spider Web', 'Swagger'],
 	},
@@ -3229,6 +3255,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen2',
+		searchShow: false,
 		ruleset: ['Standard'],
 		banlist: ['Uber', 'Mean Look + Baton Pass', 'Spider Web + Baton Pass'],
 	},
@@ -3241,6 +3268,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen1',
+		searchShow: false,
 		ruleset: ['Standard'],
 		banlist: ['Uber'],
 	},
@@ -3262,6 +3290,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen8',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Standard Doubles', 'Dynamax Clause', 'Swagger Clause'],
 		banlist: ['DUber', 'Power Construct', 'Shadow Tag'],
 	},
@@ -3275,6 +3304,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Standard Doubles', 'Swagger Clause'],
 		banlist: ['DUber', 'Power Construct', 'Eevium Z', 'Dark Void'],
 	},
@@ -3288,6 +3318,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen6',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Standard Doubles', 'Swagger Clause'],
 		banlist: ['DUber', 'Soul Dew', 'Dark Void'],
 	},
