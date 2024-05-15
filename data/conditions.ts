@@ -120,6 +120,29 @@ export const Conditions: {[k: string]: ConditionData} = {
 			}
 		},
 	},
+	frb: {
+		// TODO Research frostbite interactions
+		name: 'frb',
+		effectType: 'Status',
+		onStart(target, source, sourceEffect) {
+			if (sourceEffect && sourceEffect.effectType === 'Ability') {
+				this.add('-status', target, 'frb', '[from] ability: ' + sourceEffect.name, '[of] ' + source);
+			} else {
+				this.add('-status', target, 'frb');
+			}
+		},
+		onModifyMove(move, pokemon) {
+			if (move.flags['defrost']) {
+				this.add('-curestatus', pokemon, 'frb', '[from] move: ' + move);
+				pokemon.clearStatus();
+			}
+		},
+		// Damage reduction is handled directly in the sim/battle.js damage function
+		onResidualOrder: 10,
+		onResidual(pokemon) {
+			this.damage(pokemon.baseMaxhp / 16);
+		},
+	},
 	psn: {
 		name: 'psn',
 		effectType: 'Status',
