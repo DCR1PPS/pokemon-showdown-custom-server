@@ -1,4 +1,4 @@
-import {FS, Utils} from '../../lib';
+import { FS, Utils } from '../../lib';
 
 const DAY = 24 * 60 * 60 * 1000;
 const SPOTLIGHT_FILE = 'config/chat-plugins/spotlights.json';
@@ -14,7 +14,7 @@ interface Spotlight {
 }
 
 export let spotlights: {
-	[roomid: string]: {[k: string]: Spotlight[]},
+	[roomid: string]: { [k: string]: Spotlight[] },
 } = {};
 
 try {
@@ -52,11 +52,11 @@ function nextDaily() {
 
 const midnight = new Date();
 midnight.setHours(24, 0, 0, 0);
-let timeout = setTimeout(nextDaily, midnight.valueOf() - Date.now());
+let timeout = setTimeout(nextDaily, midnight.getTime() - Date.now());
 
 export async function renderSpotlight(roomid: RoomID, key: string, index: number) {
 	let imgHTML = '';
-	const {image, description} = spotlights[roomid][key][index];
+	const { image, description } = spotlights[roomid][key][index];
 
 	if (image) {
 		if (Array.isArray(image)) {
@@ -66,6 +66,7 @@ export async function renderSpotlight(roomid: RoomID, key: string, index: number
 			try {
 				const [width, height] = await Chat.fitImage(image, 150, 300);
 				imgHTML = `<td><img src="${image}" width="${width}" height="${height}" style="vertical-align:middle;"></td>`;
+				// eslint-disable-next-line require-atomic-updates
 				spotlights[roomid][key][index].image = [image, width, height];
 			} catch {}
 		}
@@ -249,7 +250,7 @@ export const commands: Chat.ChatCommands = {
 			return this.errorReply("Descriptions can be at most 500 characters long.");
 		}
 		if (img) img = [img, width, height] as StoredImage;
-		const obj = {image: img, description: desc, time: Date.now()};
+		const obj = { image: img, description: desc, time: Date.now() };
 		if (!spotlights[room.roomid][key]) spotlights[room.roomid][key] = [];
 		if (cmd === 'setdaily') {
 			spotlights[room.roomid][key].shift();
@@ -286,7 +287,7 @@ export const commands: Chat.ChatCommands = {
 
 		if (!this.runBroadcast()) return;
 
-		const {image, description} = spotlights[room.roomid][key][0];
+		const { image, description } = spotlights[room.roomid][key][0];
 		const html = await renderSpotlight(room.roomid, key, 0);
 
 		this.sendReplyBox(html);
@@ -308,13 +309,13 @@ export const commands: Chat.ChatCommands = {
 	dailyhelp() {
 		this.sendReply(
 			`|html|<details class="readmore"><summary><code>/daily [name]</code>: shows the daily spotlight.<br />` +
-			`<code>!daily [name]</code>: shows the daily spotlight to everyone. Requires: + % @ # &<br />` +
-			`<code>/setdaily [name], [image], [description]</code>: sets the daily spotlight. Image can be left out. Requires: % @ # &</summary>` +
-			`<code>/queuedaily [name], [image], [description]</code>: queues a daily spotlight. At midnight, the spotlight with this name will automatically switch to the next queued spotlight. Image can be left out. Requires: % @ # &<br />` +
-			`<code>/queuedailyat [name], [queue number], [image], [description]</code>: inserts a daily spotlight into the queue at the specified number (starting from 1). Requires: % @ # &<br />` +
-			`<code>/replacedaily [name], [queue number], [image], [description]</code>: replaces the daily spotlight queued at the specified number. Requires: % @ # &<br />` +
-			`<code>/removedaily [name][, queue number]</code>: if no queue number is provided, deletes all queued and current spotlights with the given name. If a number is provided, removes a specific future spotlight from the queue. Requires: % @ # &<br />` +
-			`<code>/swapdaily [name], [queue number], [queue number]</code>: swaps the two queued spotlights at the given queue numbers. Requires: % @ # &<br />` +
+			`<code>!daily [name]</code>: shows the daily spotlight to everyone. Requires: + % @ # ~<br />` +
+			`<code>/setdaily [name], [image], [description]</code>: sets the daily spotlight. Image can be left out. Requires: % @ # ~</summary>` +
+			`<code>/queuedaily [name], [image], [description]</code>: queues a daily spotlight. At midnight, the spotlight with this name will automatically switch to the next queued spotlight. Image can be left out. Requires: % @ # ~<br />` +
+			`<code>/queuedailyat [name], [queue number], [image], [description]</code>: inserts a daily spotlight into the queue at the specified number (starting from 1). Requires: % @ # ~<br />` +
+			`<code>/replacedaily [name], [queue number], [image], [description]</code>: replaces the daily spotlight queued at the specified number. Requires: % @ # ~<br />` +
+			`<code>/removedaily [name][, queue number]</code>: if no queue number is provided, deletes all queued and current spotlights with the given name. If a number is provided, removes a specific future spotlight from the queue. Requires: % @ # ~<br />` +
+			`<code>/swapdaily [name], [queue number], [queue number]</code>: swaps the two queued spotlights at the given queue numbers. Requires: % @ # ~<br />` +
 			`<code>/viewspotlights [sorter]</code>: shows all current spotlights in the room. For staff, also shows queued spotlights.` +
 			`[sorter] can either be unset, 'time', or 'alphabet'. These sort by either the time added, or alphabetical order.` +
 			`</details>`

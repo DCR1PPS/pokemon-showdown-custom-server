@@ -2,7 +2,7 @@
  * @author mia-pi-git
  */
 
-import {FS, Net, Utils} from '../../lib';
+import { FS, Net, Utils } from '../../lib';
 
 export const SEASONS_PER_YEAR = 4;
 export const FORMATS_PER_SEASON = 4;
@@ -16,8 +16,8 @@ export const FORMAT_POOL = ['ubers', 'uu', 'ru', 'nu', 'pu', 'lc', 'doublesou', 
 export const PUBLIC_PHASE_LENGTH = 3;
 
 interface SeasonData {
-	current: {period: number, year: number, formatsGeneratedAt: number, season: number};
-	badgeholders: {[period: string]: {[format: string]: {[badgeType: string]: string[]}}};
+	current: { period: number, year: number, formatsGeneratedAt: number, season: number };
+	badgeholders: { [period: string]: { [format: string]: { [badgeType: string]: string[] } } };
 	formatSchedule: Record<string, string[]>;
 }
 
@@ -28,21 +28,21 @@ try {
 } catch {
 	data = {
 		// force a reroll
-		current: {season: null!, year: null!, formatsGeneratedAt: null!, period: null!},
+		current: { season: null!, year: null!, formatsGeneratedAt: null!, period: null! },
 		formatSchedule: {},
 		badgeholders: {},
 	};
 }
 
 export function getBadges(user: User, curFormat: string) {
-	let userBadges: {type: string, format: string}[] = [];
+	let userBadges: { type: string, format: string }[] = [];
 	const season = data.current.season; // don't factor in old badges
 	for (const format in data.badgeholders[season]) {
 		const badges = data.badgeholders[season][format];
 		for (const type in badges) {
 			if (badges[type].includes(user.id)) {
 				// ex badge-bronze-gen9ou-250-1-2024
-				userBadges.push({type, format});
+				userBadges.push({ type, format });
 			}
 		}
 	}
@@ -50,7 +50,7 @@ export function getBadges(user: User, curFormat: string) {
 	let curFormatBadge;
 	for (const [i, badge] of userBadges.entries()) {
 		if (badge.format === curFormat) {
-			userBadges.splice(i);
+			userBadges.splice(i, 1);
 			curFormatBadge = badge;
 		}
 	}
@@ -60,6 +60,17 @@ export function getBadges(user: User, curFormat: string) {
 	if (curFormatBadge) userBadges.unshift(curFormatBadge);
 	// format and return
 	return userBadges;
+}
+
+function getUserHTML(user: User, format: string) {
+	const buf = `<username>${user.name}</username>`;
+	const badgeType = getBadges(user, format).find(x => x.format === format)?.type;
+	if (badgeType) {
+		let formatType = format.split(/gen\d+/)[1];
+		if (!['ou', 'randombattle'].includes(formatType)) formatType = 'rotating';
+		return `<img src="https://${Config.routes.client}/sprites/misc/${formatType}_${badgeType}.png" />` + buf;
+	}
+	return buf;
 }
 
 export function setFormatSchedule() {
@@ -174,15 +185,15 @@ function getYear() {
 	return new Date().getFullYear();
 }
 
-function findPeriod() {
-	return Math.floor(new Date().getMonth() / (SEASONS_PER_YEAR - 1)) + 1;
+function findPeriod(modifier = 0) {
+	return Math.floor((new Date().getMonth() + modifier) / (SEASONS_PER_YEAR - 1)) + 1;
 }
 
 /** Are we in the last three days of the month (the public phase, where badged battles are public and the room is active?) */
 function checkPublicPhase() {
 	const daysInCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-	// last 3 days of the month
-	return new Date().getDate() >= (daysInCurrentMonth - PUBLIC_PHASE_LENGTH);
+	// last 3 days of the month, and next month is a new season
+	return new Date().getDate() >= (daysInCurrentMonth - PUBLIC_PHASE_LENGTH) && findPeriod() !== findPeriod(1);
 }
 
 export function saveData() {
@@ -206,7 +217,7 @@ export function rollSeason() {
 	}
 }
 
-export let updateTimeout: NodeJS.Timer | true | null = null;
+export let updateTimeout: NodeJS.Timeout | true | null = null;
 
 export function rollTimer() {
 	if (updateTimeout === true) return;
@@ -217,8 +228,7 @@ export function rollTimer() {
 	void updateBadgeholders();
 	const time = Date.now();
 	const next = new Date();
-	next.setHours(next.getHours() + 1);
-	next.setMinutes(0, 0, 0);
+	next.setHours(next.getHours() + 1, 0, 0, 0);
 	updateTimeout = setTimeout(() => rollTimer(), next.getTime() - time);
 
 	const discussionRoom = Rooms.search('seasondiscussion');
@@ -231,8 +241,7 @@ export function rollTimer() {
 				`<br /> Badged battles are now forced public, and this room is open for use.</div>`
 			).update();
 		} else if (!checkPublicPhase() && !discussionRoom.settings.isPrivate) {
-			discussionRoom.setPrivate(true);
-			discussionRoom.settings.modchat = '#';
+			discussionRoom.setPrivate('unlisted');
 			discussionRoom.add(
 				`|html|<div class="broadcast-blue">The public phase of the month has ended.</div>`
 			).update();
@@ -290,7 +299,7 @@ export const pages: Chat.PageTable = {
 			);
 			for (const s of seasonsDesc) {
 				buf += `<h3>Season ${s}</h3><hr />`;
-				for (const f in data.badgeholders[season]) {
+				for (const f in data.badgeholders[s]) {
 					buf += `<a class="button" name="send" target="replace" href="/view-seasonladder-${f}-${s}">${Dex.formats.get(f).name}</a>`;
 				}
 				buf += `<br />`;
@@ -301,7 +310,7 @@ export const pages: Chat.PageTable = {
 		const uppercase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 		let formatName = Dex.formats.get(format).name;
 		// futureproofing for gen10/etc
-		const room = Rooms.search(format.split(/\d+/)[1] + "");
+		const room = Rooms.search(Utils.splitFirst(format, /\d+/)[1] || '');
 		if (room) {
 			formatName = `<a href="/${room.roomid}">${formatName}</a>`;
 		}
@@ -345,6 +354,18 @@ export const handlers: Chat.Handlers = {
 				`During the public phase, you can discuss the state of the ladder <a href="/seasondiscussion">in a special chatroom.</a></div>`
 			);
 			room.setPrivate(false);
+			const seasonRoom = Rooms.search('seasondiscussion');
+			if (seasonRoom) {
+				const p1html = getUserHTML(user, room.battle.format);
+				const otherPlayer = user.id === room.battle.p1.id ? room.battle.p2 : room.battle.p1;
+				const otherUser = otherPlayer.getUser();
+				const p2html = otherUser ? getUserHTML(otherUser, room.battle.format) : `<username>${otherPlayer.name}</username>`;
+				const formatName = Dex.formats.get(room.battle.format).name;
+				seasonRoom.add(
+					`|raw|<a href="/${room.roomid}" class="ilink">${formatName} battle started between ` +
+					`${p1html} and ${p2html}. (rating: ${Math.floor(room.battle.rated)})</a>`
+				).update();
+			}
 		}
 
 		room.add(

@@ -2,7 +2,7 @@
  * The japanese version of Blizzard in Gen 1 had a 30% chance to freeze
  */
 
-export const Moves: {[k: string]: ModdedMoveData} = {
+export const Moves: import('../../../sim/dex-moves').ModdedMoveDataTable = {
 	blizzard: {
 		inherit: true,
 		secondary: {
@@ -65,7 +65,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 				// Add here counter damage
 				const lastAttackedBy = target.getLastAttackedBy();
 				if (!lastAttackedBy) {
-					target.attackedBy.push({source: source, move: move.id, damage: uncappedDamage, thisTurn: true, slot: source.getSlot()});
+					target.attackedBy.push({ source, move: move.id, damage: uncappedDamage, thisTurn: true, slot: source.getSlot() });
 				} else {
 					lastAttackedBy.move = move.id;
 					lastAttackedBy.damage = uncappedDamage;

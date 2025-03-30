@@ -7,14 +7,14 @@
  * @author mia-pi-git
  */
 
-import {FS, Utils} from '../../lib';
-import {LogViewer} from './chatlog';
-import {roomFaqs, visualizeFaq} from './room-faqs';
+import { FS, Utils } from '../../lib';
+import { LogViewer } from './chatlog';
+import { roomFaqs, visualizeFaq } from './room-faqs';
 
 const DATA_PATH = 'config/chat-plugins/responder.json';
-const LOG_PATH = 'logs/responder.jsonl';
+const LOG_PATH = Monitor.logPath('responder.jsonl').path;
 
-export let answererData: {[roomid: string]: PluginData} = {};
+export let answererData: { [roomid: string]: PluginData } = {};
 
 try {
 	answererData = JSON.parse(FS(DATA_PATH).readSync());
@@ -34,7 +34,7 @@ interface LoggedMessage {
 }
 interface PluginData {
 	/** Word pairs that have been marked as a match for a specific FAQ. */
-	pairs: {[k: string]: string[]};
+	pairs: { [k: string]: string[] };
 	/** Common terms to be ignored in question parsing. */
 	ignore?: string[];
 }
@@ -44,14 +44,14 @@ export class AutoResponder {
 	room: Room;
 	constructor(room: Room, data?: PluginData) {
 		this.room = room;
-		this.data = data || {pairs: {}, ignore: []};
+		this.data = data || { pairs: {}, ignore: [] };
 		AutoResponder.migrateStats(this.data, this);
 	}
 	static migrateStats(data: any, responder: AutoResponder) {
 		if (!data.stats) return data;
 		for (const date in data.stats) {
 			for (const entry of data.stats[date].matches) {
-				void this.logMessage(responder.room.roomid, {...entry, date});
+				void this.logMessage(responder.room.roomid, { ...entry, date });
 			}
 		}
 		delete data.stats;
@@ -190,7 +190,7 @@ export class AutoResponder {
 		const regexes = this.data.pairs[faq].map(item => new RegExp(item, "i"));
 		if (!regexes.length) return;
 		for (const regex of regexes) {
-			if (regex.test(question)) return {faq, regex: regex.toString()};
+			if (regex.test(question)) return { faq, regex: regex.toString() };
 		}
 		return null;
 	}
@@ -241,8 +241,7 @@ export class AutoResponder {
 	destroy() {
 		this.writeState();
 		this.room.responder = null;
-		// @ts-ignore deallocating
-		this.room = null;
+		this.room = null!;
 	}
 	ignore(terms: string[], context: Chat.CommandContext) {
 		const filtered = terms.map(t => context.filter(t)).filter(Boolean);
@@ -421,11 +420,11 @@ export const commands: Chat.ChatCommands = {
 	autoresponderhelp() {
 		const help = [
 			`<code>/autoresponder view [page]</code> - Views the Autoresponder page [page]. (options: keys, stats)`,
-			`<code>/autoresponder toggle [on | off]</code> - Enables or disables the Autoresponder for the current room. Requires: @ # &`,
+			`<code>/autoresponder toggle [on | off]</code> - Enables or disables the Autoresponder for the current room. Requires: @ # ~`,
 			`<code>/autoresponder add [input] => [faq]</code> - Adds regex made from the input string to the current room's Autoresponder, to respond with [faq] to matches.`,
 			`<code>/autoresponder remove [faq], [regex index]</code> - removes the regex matching the [index] from the current room's responses for [faq].`,
 			`Indexes can be found in /autoresponder keys.`,
-			`Requires: @ # &`,
+			`Requires: @ # ~`,
 		];
 		return this.sendReplyBox(help.join('<br/ >'));
 	},
@@ -532,7 +531,7 @@ export const pages: Chat.PageTable = {
 export const handlers: Chat.Handlers = {
 	onRenameRoom(oldID, newID) {
 		if (answererData[oldID]) {
-			if (!answererData[newID]) answererData[newID] = {pairs: {}};
+			if (!answererData[newID]) answererData[newID] = { pairs: {} };
 			Object.assign(answererData[newID], answererData[oldID]);
 			delete answererData[oldID];
 			FS(DATA_PATH).writeUpdate(() => JSON.stringify(answererData));

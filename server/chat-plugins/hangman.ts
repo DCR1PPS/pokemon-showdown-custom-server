@@ -2,7 +2,7 @@
 * Hangman chat plugin
 * By bumbadadabum and Zarel. Art by crobat.
 */
-import {FS, Utils} from '../../lib';
+import { FS, Utils } from '../../lib';
 
 const HANGMAN_FILE = 'config/chat-plugins/hangman.json';
 
@@ -22,7 +22,7 @@ interface HangmanOptions {
 	allowCreator?: boolean;
 }
 
-export let hangmanData: {[roomid: string]: {[phrase: string]: HangmanEntry}} = {};
+export let hangmanData: { [roomid: string]: { [phrase: string]: HangmanEntry } } = {};
 
 try {
 	hangmanData = JSON.parse(FS(HANGMAN_FILE).readSync());
@@ -33,7 +33,7 @@ try {
 		if (roomKeys.length && !roomData[roomKeys[0]].hints) {
 			save = true;
 			for (const key of roomKeys) {
-				roomData[key] = {hints: roomData[key] as any};
+				roomData[key] = { hints: roomData[key] as any };
 			}
 		}
 	}
@@ -57,7 +57,7 @@ export class Hangman extends Rooms.SimpleRoomGame {
 	letterGuesses: string[];
 	lastGuesser: string;
 	wordSoFar: string[];
-	readonly checkChat = true;
+	override readonly checkChat = true;
 
 	constructor(
 		room: Room,
@@ -91,7 +91,7 @@ export class Hangman extends Rooms.SimpleRoomGame {
 		}
 	}
 
-	choose(user: User, word: string) {
+	override choose(user: User, word: string) {
 		if (user.id === this.creator && !this.options.allowCreator) {
 			throw new Chat.ErrorMessage("You can't guess in your own hangman game.");
 		}
@@ -312,7 +312,7 @@ export class Hangman extends Rooms.SimpleRoomGame {
 				throw new Chat.ErrorMessage(`Hint must be less than ${MAX_HINT_LENGTH} characters long.`);
 			}
 		}
-		return {phrase, hint};
+		return { phrase, hint };
 	}
 }
 
@@ -332,7 +332,7 @@ export const commands: Chat.ChatCommands = {
 			if (room.game) return this.errorReply(`There is already a game of ${room.game.title} in progress in this room.`);
 
 			if (!params) return this.errorReply("No word entered.");
-			const {phrase, hint} = Hangman.validateParams(params);
+			const { phrase, hint } = Hangman.validateParams(params);
 
 			const game = new Hangman(room, user, phrase, hint);
 			room.game = game;
@@ -341,7 +341,7 @@ export const commands: Chat.ChatCommands = {
 			this.modlog('HANGMAN');
 			return this.addModAction(`A game of hangman was started by ${user.name} – use /guess to play!`);
 		},
-		createhelp: ["/hangman create [word], [hint] - Makes a new hangman game. Requires: % @ # &"],
+		createhelp: ["/hangman create [word], [hint] - Makes a new hangman game. Requires: % @ # ~"],
 
 		guess(target, room, user) {
 			const word = this.filter(target);
@@ -363,7 +363,7 @@ export const commands: Chat.ChatCommands = {
 			this.modlog('ENDHANGMAN');
 			return this.privateModAction(`The game of hangman was ended by ${user.name}.`);
 		},
-		endhelp: ["/hangman end - Ends the game of hangman before the man is hanged or word is guessed. Requires: % @ # &"],
+		endhelp: ["/hangman end - Ends the game of hangman before the man is hanged or word is guessed. Requires: % @ # ~"],
 
 		disable(target, room, user) {
 			room = this.requireRoom();
@@ -407,8 +407,8 @@ export const commands: Chat.ChatCommands = {
 				throw new Chat.ErrorMessage(`There is already a game of ${room.game.title} running.`);
 			}
 			target = toID(target);
-			const {question, hint} = Hangman.getRandom(room.roomid, target);
-			const game = new Hangman(room, user, question, hint, {allowCreator: true});
+			const { question, hint } = Hangman.getRandom(room.roomid, target);
+			const game = new Hangman(room, user, question, hint, { allowCreator: true });
 			room.game = game;
 			this.addModAction(`${user.name} started a random game of hangman - use /guess to play!`);
 			game.display(user, true);
@@ -421,8 +421,8 @@ export const commands: Chat.ChatCommands = {
 			if (!target) return this.parse('/help hangman');
 			// validation
 			const args = target.split(target.includes('|') ? '|' : ',');
-			const {phrase} = Hangman.validateParams(args);
-			if (!hangmanData[room.roomid][phrase]) hangmanData[room.roomid][phrase] = {hints: []};
+			const { phrase } = Hangman.validateParams(args);
+			if (!hangmanData[room.roomid][phrase]) hangmanData[room.roomid][phrase] = { hints: [] };
 			args.shift();
 			hangmanData[room.roomid][phrase].hints.push(...args);
 			Hangman.save();
@@ -481,7 +481,7 @@ export const commands: Chat.ChatCommands = {
 			// only a .trim() because toID will make it unable to find the term if it has caps
 			term = term.trim();
 			tags = tags.map(i => toID(i)).filter(Boolean);
-			if (!term || !tags || !tags.length) {
+			if (!term || !tags?.length) {
 				return this.parse('/help hangman');
 			}
 			if (!hangmanData[room.roomid]) {
@@ -553,20 +553,20 @@ export const commands: Chat.ChatCommands = {
 	hangmanhelp: [
 		`/hangman allows users to play the popular game hangman in PS rooms.`,
 		`Accepts the following commands:`,
-		`/hangman create [word], [hint] - Makes a new hangman game. Requires: % @ # &`,
+		`/hangman create [word], [hint] - Makes a new hangman game. Requires: % @ # ~`,
 		`/hangman guess [letter] - Makes a guess for the letter entered.`,
 		`/hangman guess [word] - Same as a letter, but guesses an entire word.`,
 		`/hangman display - Displays the game.`,
-		`/hangman end - Ends the game of hangman before the man is hanged or word is guessed. Requires: % @ # &`,
-		`/hangman [enable/disable] - Enables or disables hangman from being started in a room. Requires: # &`,
+		`/hangman end - Ends the game of hangman before the man is hanged or word is guessed. Requires: % @ # ~`,
+		`/hangman [enable/disable] - Enables or disables hangman from being started in a room. Requires: # ~`,
 		`/hangman random [tag]- Runs a random hangman, if the room has any added. `,
-		`If a tag is given, randomizes from only terms with those tags. Requires: % @ # &`,
-		`/hangman addrandom [word], [...hints] - Adds an entry for [word] with the [hints] provided to the room's hangman pool. Requires: % @ # &`,
+		`If a tag is given, randomizes from only terms with those tags. Requires: % @ # ~`,
+		`/hangman addrandom [word], [...hints] - Adds an entry for [word] with the [hints] provided to the room's hangman pool. Requires: % @ # ~`,
 		`/hangman removerandom [word][, hints] - Removes data from the hangman entry for [word]. If hints are given, removes only those hints.` +
-		` Otherwise it removes the entire entry. Requires: % @ & #`,
-		`/hangman addtag [word], [...tags] - Adds tags to the hangman term matching [word]. Requires: % @ & #`,
+		` Otherwise it removes the entire entry. Requires: % @ ~ #`,
+		`/hangman addtag [word], [...tags] - Adds tags to the hangman term matching [word]. Requires: % @ ~ #`,
 		`/hangman untag [term][, ...tags] - Removes tags from the hangman [term]. If tags are given, removes only those tags. Requires: % @ # * `,
-		`/hangman terms - Displays all random hangman in a room. Requires: % @ # &`,
+		`/hangman terms - Displays all random hangman in a room. Requires: % @ # ~`,
 	],
 };
 

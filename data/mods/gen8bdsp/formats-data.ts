@@ -1,5 +1,5 @@
 // TODO: alphabetize move names. I'm trying to implement this on a low-quality laptop under time pressure, so I haven't bothered doing so.
-export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
+export const FormatsData: import('../../../sim/dex-species').ModdedSpeciesFormatsDataTable = {
 	bulbasaur: {
 		tier: "LC",
 	},
@@ -223,7 +223,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	arcanine: {
-		tier: "UU",
+		tier: "RU",
 		doublesTier: "DOU",
 	},
 	poliwag: {
@@ -257,7 +257,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "NFE",
 	},
 	machamp: {
-		tier: "RU",
+		tier: "UU",
 		doublesTier: "DUU",
 	},
 	bellsprout: {
@@ -274,7 +274,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	tentacruel: {
-		tier: "UU",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	geodude: {
@@ -533,14 +533,14 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUU",
 	},
 	tauros: {
-		tier: "NUBL",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	magikarp: {
 		tier: "LC",
 	},
 	gyarados: {
-		tier: "RUBL",
+		tier: "UU",
 		doublesTier: "DOU",
 	},
 	lapras: {
@@ -559,7 +559,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUU",
 	},
 	jolteon: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	flareon: {
@@ -567,7 +567,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUU",
 	},
 	espeon: {
-		tier: "UU",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	umbreon: {
@@ -770,7 +770,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	ambipom: {
-		tier: "UU",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	sunkern: {
@@ -798,7 +798,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "NFE",
 	},
 	honchkrow: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	misdreavus: {
@@ -846,7 +846,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	granbull: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	qwilfish: {
@@ -986,7 +986,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "NFE",
 	},
 	sceptile: {
-		tier: "NUBL",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	torchic: {
@@ -1169,7 +1169,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "NFE",
 	},
 	aggron: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	meditite: {
@@ -1241,7 +1241,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUU",
 	},
 	torkoal: {
-		tier: "UU",
+		tier: "NU",
 		doublesTier: "DOU",
 	},
 	spoink: {
@@ -1269,7 +1269,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	cacturne: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	swablu: {
@@ -1313,7 +1313,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	claydol: {
-		tier: "RU",
+		tier: "NU",
 		doublesTier: "DUU",
 	},
 	lileep: {
@@ -1370,11 +1370,11 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	chimecho: {
-		tier: "PUBL",
+		tier: "PU",
 		doublesTier: "DUU",
 	},
 	absol: {
-		tier: "NUBL",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	snorunt: {
@@ -1615,7 +1615,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		tier: "LC",
 	},
 	gastrodon: {
-		tier: "RU",
+		tier: "UU",
 		doublesTier: "DOU",
 	},
 	drifloon: {
@@ -1742,11 +1742,11 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUU",
 	},
 	uxie: {
-		tier: "UU",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	mesprit: {
-		tier: "NUBL",
+		tier: "RU",
 		doublesTier: "DUU",
 	},
 	azelf: {
@@ -1778,7 +1778,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 		doublesTier: "DUber",
 	},
 	cresselia: {
-		tier: "RUBL",
+		tier: "UU",
 		doublesTier: "DOU",
 	},
 	phione: {

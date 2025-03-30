@@ -1,9 +1,9 @@
-import {FS, Utils} from '../../lib';
+import { FS, Utils } from '../../lib';
 
 export const ROOMFAQ_FILE = 'config/chat-plugins/faqs.json';
 const MAX_ROOMFAQ_LENGTH = 8192;
 
-export const roomFaqs: {[k: string]: {[k: string]: RoomFAQ}} = (() => {
+export const roomFaqs: { [k: string]: { [k: string]: RoomFAQ } } = (() => {
 	const data = JSON.parse(FS(ROOMFAQ_FILE).readIfExistsSync() || "{}");
 	let save = false;
 	for (const k in data) {
@@ -24,7 +24,7 @@ interface RoomFAQ {
 	html?: boolean;
 }
 
-function saveRoomFaqs(table?: {[k: string]: {[k: string]: RoomFAQ}}) {
+function saveRoomFaqs(table?: { [k: string]: { [k: string]: RoomFAQ } }) {
 	FS(ROOMFAQ_FILE).writeUpdate(() => JSON.stringify(table || roomFaqs));
 }
 
@@ -108,7 +108,7 @@ export const commands: Chat.ChatCommands = {
 		const topic = toID(target);
 		if (!topic) return this.parse('/help roomfaq');
 
-		if (!(roomFaqs[room.roomid] && roomFaqs[room.roomid][topic])) return this.errorReply("Invalid topic.");
+		if (!roomFaqs[room.roomid]?.[topic]) return this.errorReply("Invalid topic.");
 		if (
 			room.settings.repeats?.length &&
 			room.settings.repeats.filter(x => x.faq && x.id === topic).length
@@ -117,9 +117,9 @@ export const commands: Chat.ChatCommands = {
 		}
 		delete roomFaqs[room.roomid][topic];
 		Object.keys(roomFaqs[room.roomid]).filter(
-			val => getAlias(room!.roomid, val) === topic
+			val => getAlias(room.roomid, val) === topic
 		).map(
-			val => delete roomFaqs[room!.roomid][val]
+			val => delete roomFaqs[room.roomid][val]
 		);
 		if (!Object.keys(roomFaqs[room.roomid]).length) delete roomFaqs[room.roomid];
 		saveRoomFaqs();
@@ -180,10 +180,10 @@ export const commands: Chat.ChatCommands = {
 	roomfaqhelp: [
 		`/roomfaq - Shows the list of all available FAQ topics`,
 		`/roomfaq <topic> - Shows the FAQ for <topic>.`,
-		`/addfaq <topic>, <text> - Adds an entry for <topic> in this room or updates it. Requires: @ # &`,
-		`/addhtmlfaq <topic>, <text> - Adds or updates an entry for <topic> with HTML support. Requires: # &`,
-		`/addalias <alias>, <topic> - Adds <alias> as an alias for <topic>, displaying it when users use /roomfaq <alias>. Requires: @ # &`,
-		`/removefaq <topic> - Removes the entry for <topic> in this room. If used on an alias, removes the alias. Requires: @ # &`,
+		`/addfaq <topic>, <text> - Adds an entry for <topic> in this room or updates it. Requires: @ # ~`,
+		`/addhtmlfaq <topic>, <text> - Adds or updates an entry for <topic> with HTML support. Requires: # ~`,
+		`/addalias <alias>, <topic> - Adds <alias> as an alias for <topic>, displaying it when users use /roomfaq <alias>. Requires: @ # ~`,
+		`/removefaq <topic> - Removes the entry for <topic> in this room. If used on an alias, removes the alias. Requires: @ # ~`,
 	],
 };
 

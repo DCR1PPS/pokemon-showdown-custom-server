@@ -2,8 +2,8 @@
 
 const assert = require('./../assert');
 
-describe('Dex data', function () {
-	it('should have valid Pokedex entries', function () {
+describe('Dex data', () => {
+	it('should have valid Pokedex entries', () => {
 		const Pokedex = Dex.data.Pokedex;
 		for (const pokemonid in Pokedex) {
 			const entry = Pokedex[pokemonid];
@@ -28,6 +28,7 @@ describe('Dex data', function () {
 				assert(!entry.baseSpecies, `Base species ${entry.name} should not have its own baseSpecies.`);
 				assert(!entry.changesFrom, `Base species ${entry.name} should not change from anything (its changesFrom forme should be base).`);
 				assert(!entry.battleOnly, `Base species ${entry.name} should not be battle-only (its out-of-battle forme should be base).`);
+				assert(!entry.baseForme || Dex.data.Aliases[pokemonid + toID(entry.baseForme)] === entry.name.replace(/\u0301/g, ""), `Base species ${entry.name}-${entry.baseForme} should be aliased to ${entry.name}`);
 			}
 
 			if (entry.prevo) {
@@ -53,6 +54,12 @@ describe('Dex data', function () {
 						assert.notEqual(entry.formeOrder, undefined, `${entry.name} has an otherForme "${forme}" but no formeOrder field`);
 						assert(entry.formeOrder.includes(forme), `Forme "${forme}" of ${entry.name} is not included in its formeOrder`);
 					}
+				}
+			}
+			if (entry.cosmeticFormes) {
+				for (const forme of entry.cosmeticFormes) {
+					assert.equal(Dex.data.Aliases[toID(forme)], entry.name.replace(/\u0301/g, ""), `Misspelled/nonexistent alias "${forme}" of ${entry.name}`);
+					assert.equal(Dex.data.FormatsData[toID(forme)], undefined, `Cosmetic forme "${forme}" should not have its own tier`);
 				}
 			}
 			if (entry.battleOnly) {
@@ -85,7 +92,7 @@ describe('Dex data', function () {
 			if (entry.formeOrder) {
 				for (const forme of entry.formeOrder) {
 					if (toID(forme).includes('gmax')) continue;
-					 // formeOrder contains other formes and 'cosmetic' formes which do not have entries in Pokedex but should have aliases
+					// formeOrder contains other formes and 'cosmetic' formes which do not have entries in Pokedex but should have aliases
 					const formeEntry = Dex.species.get(toID(forme));
 					assert.equal(forme, formeEntry.name, `Misspelled/nonexistent forme "${forme}" of ${entry.name}`);
 					assert(entry.formeOrder.includes(formeEntry.baseSpecies), `${entry.name}'s formeOrder does not contain its base species ${formeEntry.baseSpecies}`);
@@ -110,7 +117,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Items entries', function () {
+	it('should have valid Items entries', () => {
 		const Items = Dex.data.Items;
 		for (const itemid in Items) {
 			const entry = Items[itemid];
@@ -119,7 +126,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Moves entries', function () {
+	it('should have valid Moves entries', () => {
 		const Moves = Dex.data.Moves;
 		for (const moveid in Moves) {
 			const entry = Moves[moveid];
@@ -129,7 +136,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Abilities entries', function () {
+	it('should have valid Abilities entries', () => {
 		const Abilities = Dex.data.Abilities;
 		for (const abilityid in Abilities) {
 			const entry = Abilities[abilityid];
@@ -139,7 +146,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Rulesets entries', function () {
+	it('should have valid Rulesets entries', () => {
 		const Rulesets = Dex.data.Rulesets;
 		for (const formatid in Rulesets) {
 			const entry = Rulesets[formatid];
@@ -147,7 +154,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Formats (slow)', function () {
+	it('should have valid Formats (slow)', () => {
 		for (const format of Dex.formats.all()) {
 			try {
 				Dex.formats.getRuleTable(format);
@@ -158,7 +165,7 @@ describe('Dex data', function () {
 		}
 	});
 
-	it('should have valid Natures entries', function () {
+	it('should have valid Natures entries', () => {
 		const Natures = Dex.data.Natures;
 		for (const natureid in Natures) {
 			const entry = Natures[natureid];
@@ -242,8 +249,8 @@ describe('Dex data', function () {
 
 	// Existence function takes a Pokemon and returns yes if it exists and no otherwise
 	// can be override for testing CAPs
-	function countPokemon(dex, existenceFunction = (s) => s.exists && !s.isNonstandard && s.tier !== 'Illegal') {
-		const count = {species: 0, formes: 0};
+	function countPokemon(dex, existenceFunction = s => s.exists && !s.isNonstandard && s.tier !== 'Illegal') {
+		const count = { species: 0, formes: 0 };
 		for (const pkmn of dex.species.all()) {
 			if (!existenceFunction(pkmn)) continue;
 			if (pkmn.name !== pkmn.baseSpecies) {
@@ -288,7 +295,7 @@ describe('Dex data', function () {
 	// Alola (18) + Totem (12) + Pikachu (7) - Pikachu (6) + Greninja (2) + Zygarde (2) +
 	// Oricorio (3) + Rockruff (1) + Lycanroc (2) + Wishiwashi (1) + Silvally (17) + Minior (1)
 	// Mimikyu (1) + Necrozma (3) [Magearna (1) + LGPE Starters/Meltan/Melmetal (4)]
-	formes[7] = formes[6] + 18 + 12 + 7 - 6 + 2 + 2 + 3 + 1 + 2 + 1 + 17 + 1 + 1 + 3 - 1;
+	formes[7] = formes[6] + 18 + 12 + 7 - 6 + 2 + 2 + 3 + 1 + 2 + 1 + 17 + 1 + 1 + 3;
 	// Silvally (17) + Rotom (5) + Basculin (1) + Meowstic (1) +
 	// Aegislash (1) + Pumpkaboo (3) + Gourgeist (3) + Pikachu (7) + Galar (14) +
 	// Alola (8) + Indeedee (1) + Morpeko (1) + Eiscue (1) + Zacian/Zamazenta (2) +
@@ -300,20 +307,20 @@ describe('Dex data', function () {
 	// Birds (3) + Slowking (1) + Calyrex (2)
 	// {GMax} 26 + 7
 	formes[8] = 17 + 5 + 1 + 1 + 1 + 3 + 3 + 7 + 14 + 8 +
-	  1 + 1 + 1 + 2 + 1 + 2 + 2 + 2 + 1 + 1 + 2 + 2 + 1 +
-	  (4 + 1 + 1 + 1 + 1 + 2 + (1 + 1)) + (1 + 3 + 4 + 2 + 3 + 1 + 2) - 1; // FIXME Rockruff
+		1 + 1 + 1 + 2 + 1 + 2 + 2 + 2 + 1 + 1 + 2 + 2 + 1 +
+		(4 + 1 + 1 + 1 + 1 + 2 + (1 + 1)) + (1 + 3 + 4 + 2 + 3 + 1 + 2);
 	// Pikachu (8) + Origin (3) + Therian (4) + Alola (16) + Galar (7) + Paldea (4) + Hisui (16) +
 	// Deoxys (3) + Rotom (5) + Shaymin (1) + Arceus (17) + Basculin (2) + Kyurem (2) + Keldeo (1) +
-	// Meloetta (1) + Greninja (1) + Vivillon (2) + Meowstic (1) + Hoopa (1) + Oricorio (3) +
+	// Meloetta (1) + Greninja (1) + Vivillon (2) + Meowstic (1) + Hoopa (1) + Oricorio (3) + Rockruff (1) +
 	// Lycanroc (2) + Minior (1) + Mimikyu (1) + Necrozma (2) + Magearna (1) + Toxtricity (1) +
 	// Antique (2) + Eiscue (1) + Indeedee (1) + Cramorant (2) + Morpeko (1) + Crowned (2) +
 	// Urshifu (1) + Zarude (1) + Calyrex (2) + Oinkologne (1) + Ursaluna (1) + Dudunsparce (1) +
 	// Palafin (1) + Maushold (1) + Squawkabilly (3) + Gimmighoul (1) + Basculegion (1) +
 	// Masterpiece (2) + Ogerpon (7) + Terapagos (2)
 	formes[9] = 8 + 3 + 4 + 16 + 7 + 4 + 16 + 3 + 5 + 1 + 17 +
-	  2 + 2 + 1 + 1 + 1 + 2 + 1 + 1 + 3 + 2 + 1 + 1 + 2 + 1 +
-	  1 + 2 + 1 + 1 + 2 + 1 + 2 + 1 + 1 + 1 + 2 + 1 + 1 + 1 +
-	  1 + 3 + 1 + 1 + 2 + 7 + 2;
+		2 + 2 + 1 + 1 + 1 + 2 + 1 + 1 + 3 + 1 + 2 + 1 + 1 + 2 +
+		1 + 1 + 2 + 1 + 1 + 2 + 1 + 2 + 1 + 1 + 1 + 2 + 1 + 1 +
+		1 + 1 + 3 + 1 + 1 + 2 + 7 + 2;
 
 	for (const gen of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
 		it(`Gen ${gen} should have ${species[gen]} species and ${formes[gen]} formes`, () => {

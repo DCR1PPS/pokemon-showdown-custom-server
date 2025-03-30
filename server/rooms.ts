@@ -28,21 +28,22 @@ const LAST_BATTLE_WRITE_THROTTLE = 10;
 
 const RETRY_AFTER_LOGIN = null;
 
-import {FS, Utils, Streams} from '../lib';
-import {RoomSection, RoomSections} from './chat-commands/room-settings';
-import {QueuedHunt} from './chat-plugins/scavengers';
-import {ScavengerGameTemplate} from './chat-plugins/scavenger-games';
-import {RepeatedPhrase} from './chat-plugins/repeats';
+import { FS, Utils, Streams } from '../lib';
+import { type RoomSection, RoomSections } from './chat-commands/room-settings';
+import { type QueuedHunt } from './chat-plugins/scavengers';
+import { type ScavengerGameTemplate } from './chat-plugins/scavenger-games';
+import { type RepeatedPhrase } from './chat-plugins/repeats';
 import {
 	PM as RoomBattlePM, RoomBattle, RoomBattlePlayer, RoomBattleTimer, type RoomBattleOptions,
 } from "./room-battle";
-import {BestOfGame} from './room-battle-bestof';
-import {RoomGame, SimpleRoomGame, RoomGamePlayer} from './room-game';
-import {MinorActivity, MinorActivityData} from './room-minor-activity';
-import {Roomlogs, type Roomlog} from './roomlogs';
-import {RoomAuth} from './user-groups';
-import {PartialModlogEntry, mainModlog} from './modlog';
-import {Replays} from './replays';
+import { BestOfGame } from './room-battle-bestof';
+import { RoomGame, SimpleRoomGame, RoomGamePlayer } from './room-game';
+import { MinorActivity, type MinorActivityData } from './room-minor-activity';
+import { Roomlogs, type Roomlog } from './roomlogs';
+import { RoomAuth } from './user-groups';
+import { type PartialModlogEntry, mainModlog } from './modlog';
+import { Replays } from './replays';
+import * as crypto from 'crypto';
 
 /*********************************************************
  * the Room object.
@@ -84,7 +85,7 @@ interface UserTable {
 
 export interface RoomSettings {
 	title: string;
-	auth: {[userid: string]: GroupSymbol};
+	auth: { [userid: string]: GroupSymbol };
 	creationTime: number;
 	section?: RoomSection;
 
@@ -97,7 +98,7 @@ export interface RoomSettings {
 	staffRoom?: boolean;
 	language?: ID | false;
 	slowchat?: number | false;
-	events?: {[k: string]: RoomEvent | RoomEventAlias | RoomEventCategory};
+	events?: { [k: string]: RoomEvent | RoomEventAlias | RoomEventCategory };
 	filterStretching?: boolean;
 	filterEmojis?: boolean;
 	filterCaps?: boolean;
@@ -105,8 +106,8 @@ export interface RoomSettings {
 	jeopardyDisabled?: boolean;
 	mafiaDisabled?: boolean;
 	unoDisabled?: boolean;
-	blackjackDisabled?: boolean;
 	hangmanDisabled?: boolean;
+	auctionDisabled?: boolean;
 	gameNumber?: number;
 	highTraffic?: boolean;
 	spotlight?: string;
@@ -117,7 +118,7 @@ export interface RoomSettings {
 	rulesLink?: string | null;
 	dataCommandTierDisplay?: 'tiers' | 'doubles tiers' | 'National Dex tiers' | 'numbers';
 	requestShowEnabled?: boolean | null;
-	permissions?: {[k: string]: GroupSymbol};
+	permissions?: { [k: string]: GroupSymbol };
 	minorActivity?: PollData | AnnouncementData;
 	minorActivityQueue?: MinorActivityData[];
 	repeats?: RepeatedPhrase[];
@@ -147,11 +148,11 @@ export type MessageHandler = (room: BasicRoom, message: string) => void;
 export type Room = GameRoom | ChatRoom;
 export type PrivacySetting = boolean | 'hidden' | 'voice' | 'unlisted';
 
-import type {AnnouncementData} from './chat-plugins/announcements';
-import type {PollData} from './chat-plugins/poll';
-import type {AutoResponder} from './chat-plugins/responder';
-import type {RoomEvent, RoomEventAlias, RoomEventCategory} from './chat-plugins/room-events';
-import type {Tournament, TournamentRoomSettings} from './tournaments/index';
+import type { AnnouncementData } from './chat-plugins/announcements';
+import type { PollData } from './chat-plugins/poll';
+import type { AutoResponder } from './chat-plugins/responder';
+import type { RoomEvent, RoomEventAlias, RoomEventCategory } from './chat-plugins/room-events';
+import type { Tournament, TournamentRoomSettings } from './tournaments/index';
 
 export abstract class BasicRoom {
 	/** to rename use room.rename */
@@ -201,8 +202,8 @@ export abstract class BasicRoom {
 	readonly muteQueue: MuteEntry[];
 	userCount: number;
 	active: boolean;
-	muteTimer: NodeJS.Timer | null;
-	modchatTimer: NodeJS.Timer | null;
+	muteTimer: NodeJS.Timeout | null;
+	modchatTimer: NodeJS.Timeout | null;
 	lastUpdate: number;
 	lastBroadcast: string;
 	lastBroadcastTime: number;
@@ -218,13 +219,13 @@ export abstract class BasicRoom {
 
 	reportJoins: boolean;
 	batchJoins: number;
-	reportJoinsInterval: NodeJS.Timer | null;
+	reportJoinsInterval: NodeJS.Timeout | null;
 
 	minorActivity: MinorActivity | null;
 	minorActivityQueue: MinorActivityData[] | null;
 	banwordRegex: RegExp | true | null;
-	logUserStatsInterval: NodeJS.Timer | null;
-	expireTimer: NodeJS.Timer | null;
+	logUserStatsInterval: NodeJS.Timeout | null;
+	expireTimer: NodeJS.Timeout | null;
 	userList: string;
 	pendingApprovals: Map<string, ShowRequest> | null;
 
@@ -417,7 +418,7 @@ export abstract class BasicRoom {
 	 * Like addByUser, but without logging
 	 */
 	sendByUser(user: User | null, text: string) {
-		this.send('|c|' + (user ? user.getIdentity(this) : '&') + '|/log ' + text);
+		this.send('|c|' + (user ? user.getIdentity(this) : '~') + '|/log ' + text);
 	}
 	/**
 	 * Like addByUser, but sends to mods only.
@@ -508,8 +509,6 @@ export abstract class BasicRoom {
 		}
 		if (this.parent) return this.parent.getMuteTime(user);
 	}
-	// I think putting the `new` before the signature is confusing the linter
-	// eslint-disable-next-line @typescript-eslint/type-annotation-spacing
 	getGame<T extends RoomGame>(constructor: new (...args: any[]) => T, subGame = false): T | null {
 		// TODO: switch to `static readonly gameid` when all game files are TypeScripted
 		if (subGame && this.subGame && this.subGame.constructor.name === constructor.name) return this.subGame as T;
@@ -649,7 +648,7 @@ export abstract class BasicRoom {
 	logUserStats() {
 		let total = 0;
 		let guests = 0;
-		const groups: {[k: string]: number} = {};
+		const groups: { [k: string]: number } = {};
 		for (const group of Config.groupsranking) {
 			groups[group] = 0;
 		}
@@ -661,9 +660,9 @@ export abstract class BasicRoom {
 			}
 			++groups[this.auth.get(user.id)];
 		}
-		let entry = '|userstats|total:' + total + '|guests:' + guests;
+		let entry = `|userstats|total:${total}|guests:${guests}`;
 		for (const i in groups) {
-			entry += '|' + i + ':' + groups[i];
+			entry += `|${i}:${groups[i]}`;
 		}
 		this.roomlog(entry);
 	}
@@ -751,14 +750,16 @@ export abstract class BasicRoom {
 				}
 				message += `<strong>Comment:</strong> ${entry.comment ? entry.comment : 'None.'}<br />`;
 				message += `<button class="button" name="send" value="/approveshow ${userid}">Approve</button>` +
-				`<button class="button" name="send" value="/denyshow ${userid}">Deny</button></div>`;
+					`<button class="button" name="send" value="/denyshow ${userid}">Deny</button></div>`;
 				message += `<hr />`;
 			}
 			message += `</details></div>`;
 			messages.push(message);
 		}
-		if (!this.settings.isPrivate && !this.settings.isPersonal &&
-				this.settings.modchat && this.settings.modchat !== 'autoconfirmed') {
+		if (
+			!this.settings.isPrivate && !this.settings.isPersonal &&
+			this.settings.modchat && this.settings.modchat !== 'autoconfirmed'
+		) {
 			messages.push(`|raw|<div class="broadcast-red">Modchat currently set to ${this.settings.modchat}</div>`);
 		}
 		return messages.join('\n');
@@ -839,7 +840,7 @@ export abstract class BasicRoom {
 				// This is the same password generation approach as genPassword in the client replays.lib.php
 				// but obviously will not match given mt_rand there uses a different RNG and seed.
 				let password = '';
-				for (let i = 0; i < 31; i++) password += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+				for (let i = 0; i < 31; i++) password += ALPHABET[crypto.randomInt(0, ALPHABET.length - 1)];
 
 				this.rename(this.title, `${this.roomid}-${password}pw` as RoomID, true);
 			} else {
@@ -852,6 +853,12 @@ export abstract class BasicRoom {
 			}
 		}
 		this.bestOf?.setPrivacyOfGames(privacy);
+
+		if (this.game) {
+			for (const player of this.game.players) {
+				player.getUser()?.updateSearch();
+			}
+		}
 	}
 	validateSection(section: string) {
 		const target = toID(section);
@@ -961,7 +968,7 @@ export abstract class BasicRoom {
 			user.send(`>${oldID}\n|noinit|rename|${newID}|${newTitle}`);
 		}
 
-		if (this.parent && this.parent.subRooms) {
+		if (this.parent?.subRooms) {
 			(this as any).parent.subRooms.delete(oldID);
 			(this as any).parent.subRooms.set(newID, this as ChatRoom);
 		}
@@ -1025,7 +1032,7 @@ export abstract class BasicRoom {
 			const staffIntro = this.getStaffIntroMessage(user);
 			if (staffIntro) this.sendUser(user, staffIntro);
 		} else if (!user.named) {
-			this.reportJoin('l', oldid, user);
+			this.reportJoin('l', ' ' + oldid, user);
 		} else {
 			this.reportJoin('n', user.getIdentityWithStatus(this) + '|' + oldid, user);
 		}
@@ -1069,14 +1076,14 @@ export abstract class BasicRoom {
 		// they are staff and online
 		const staff = Object.values(this.users).filter(u => this.auth.atLeast(u, '%'));
 		if (!staff.length) {
-			const {time} = this.settings.autoModchat;
+			const { time } = this.settings.autoModchat;
 			if (!time || time < 5) {
 				throw new Error(`Invalid time setting for automodchat (${Utils.visualize(this.settings.autoModchat)})`);
 			}
 			if (this.modchatTimer) return;
 			this.modchatTimer = setTimeout(() => {
 				if (!this.settings.autoModchat) return;
-				const {rank} = this.settings.autoModchat;
+				const { rank } = this.settings.autoModchat;
 				const oldSetting = this.settings.modchat;
 				this.settings.modchat = rank;
 				this.add(
@@ -1217,7 +1224,7 @@ export class GlobalRoomState {
 				auth: {},
 				creationTime: Date.now(),
 				isPrivate: 'hidden',
-				modjoin: Users.SECTIONLEADER_SYMBOL,
+				modjoin: '%',
 				autojoin: true,
 			}];
 		}
@@ -1265,11 +1272,11 @@ export class GlobalRoomState {
 
 		// init battle room logging
 		if (Config.logladderip) {
-			this.ladderIpLog = FS('logs/ladderip/ladderip.txt').createAppendStream();
+			this.ladderIpLog = Monitor.logPath('ladderip/ladderip.txt').createAppendStream();
 		} else {
 			// Prevent there from being two possible hidden classes an instance
 			// of GlobalRoom can have.
-			this.ladderIpLog = new Streams.WriteStream({write() { return undefined; }});
+			this.ladderIpLog = new Streams.WriteStream({ write() { return undefined; } });
 		}
 
 		this.reportUserStatsInterval = setInterval(
@@ -1289,7 +1296,7 @@ export class GlobalRoomState {
 
 		let lastBattle;
 		try {
-			lastBattle = FS('logs/lastbattle.txt').readSync('utf8');
+			lastBattle = Monitor.logPath('lastbattle.txt').readSync('utf8');
 		} catch {}
 		this.lastBattle = Number(lastBattle) || 0;
 		this.lastWrittenBattle = this.lastBattle;
@@ -1316,7 +1323,7 @@ export class GlobalRoomState {
 		};
 	}
 	deserializeBattleRoom(battle: NonNullable<Awaited<ReturnType<GlobalRoomState['serializeBattleRoom']>>>) {
-		const {inputLog, players, roomid, title, rated, timer} = battle;
+		const { inputLog, players, roomid, title, rated, timer } = battle;
 		const [, formatid] = roomid.split('-');
 		const room = Rooms.createBattle({
 			format: formatid,
@@ -1327,7 +1334,7 @@ export class GlobalRoomState {
 			players: [],
 			delayedTimer: timer.active,
 		});
-		if (!room || !room.battle) return false; // shouldn't happen???
+		if (!room?.battle) return false; // shouldn't happen???
 		if (timer) { // json blob of settings
 			Object.assign(room.battle.timer.settings, timer);
 		}
@@ -1346,7 +1353,7 @@ export class GlobalRoomState {
 
 	async saveBattles() {
 		let count = 0;
-		const out = FS('logs/battles.jsonl.progress').createAppendStream();
+		const out = Monitor.logPath('battles.jsonl.progress').createAppendStream();
 		for (const room of Rooms.rooms.values()) {
 			if (!room.battle || room.battle.ended) continue;
 			room.battle.frozen = true;
@@ -1357,7 +1364,7 @@ export class GlobalRoomState {
 			count++;
 		}
 		await out.writeEnd();
-		await FS('logs/battles.jsonl.progress').rename('logs/battles.jsonl');
+		await Monitor.logPath('battles.jsonl.progress').rename(Monitor.logPath('battles.jsonl').path);
 		return count;
 	}
 
@@ -1366,7 +1373,7 @@ export class GlobalRoomState {
 		this.battlesLoading = true;
 		for (const u of Users.users.values()) {
 			u.send(
-				`|pm|&|${u.getIdentity()}|/uhtml restartmsg,` +
+				`|pm|~|${u.getIdentity()}|/uhtml restartmsg,` +
 				`<div class="broadcast-red"><b>Your battles are currently being restored.<br />Please be patient as they load.</div>`
 			);
 		}
@@ -1374,10 +1381,10 @@ export class GlobalRoomState {
 		let count = 0;
 		let input;
 		try {
-			const stream = FS('logs/battles.jsonl').createReadStream();
+			const stream = Monitor.logPath('battles.jsonl').createReadStream();
 			await stream.fd;
 			input = stream.byLine();
-		} catch (e) {
+		} catch {
 			return;
 		}
 		for await (const line of input) {
@@ -1385,9 +1392,9 @@ export class GlobalRoomState {
 			if (this.deserializeBattleRoom(JSON.parse(line))) count++;
 		}
 		for (const u of Users.users.values()) {
-			u.send(`|pm|&|${u.getIdentity()}|/uhtmlchange restartmsg,`);
+			u.send(`|pm|~|${u.getIdentity()}|/uhtmlchange restartmsg,`);
 		}
-		await FS('logs/battles.jsonl').unlinkIfExists();
+		await Monitor.logPath('battles.jsonl').unlinkIfExists();
 		Monitor.notice(`Loaded ${count} battles in ${Date.now() - startTime}ms`);
 		this.battlesLoading = false;
 	}
@@ -1396,7 +1403,8 @@ export class GlobalRoomState {
 		for (const room of Rooms.rooms.values()) {
 			const player = room.game && !room.game.ended && room.game.playerTable[user.id];
 			if (!player) continue;
-
+			// prevents players from being re-added to games like Scavengers after they've finished
+			if (player.completed) continue;
 			user.games.add(room.roomid);
 			player.name = user.name;
 			user.joinRoom(room.roomid);
@@ -1412,7 +1420,7 @@ export class GlobalRoomState {
 			JSON.stringify(this.settingsList)
 				.replace(/\{"title":/g, '\n{"title":')
 				.replace(/\]$/, '\n]')
-		), {throttle: 5000});
+		), { throttle: 5000 });
 	}
 
 	writeNumRooms() {
@@ -1426,7 +1434,7 @@ export class GlobalRoomState {
 			if (this.lastBattle < this.lastWrittenBattle) return;
 			this.lastWrittenBattle = this.lastBattle + LAST_BATTLE_WRITE_THROTTLE;
 		}
-		FS('logs/lastbattle.txt').writeUpdate(
+		Monitor.logPath('lastbattle.txt').writeUpdate(
 			() => `${this.lastWrittenBattle}`
 		);
 	}
@@ -1449,7 +1457,7 @@ export class GlobalRoomState {
 		if (this.formatList) {
 			return this.formatList;
 		}
-		this.formatList = '|formats' + (Ladders.formatsListPrefix || '');
+		this.formatList = `|formats${Ladders.formatsListPrefix || ''}`;
 		let section = '';
 		let prevSection = '';
 		let curColumn = 1;
@@ -1461,9 +1469,9 @@ export class GlobalRoomState {
 
 			if (section !== prevSection) {
 				prevSection = section;
-				this.formatList += '|,' + curColumn + '|' + section;
+				this.formatList += `|,${curColumn}|${section}`;
 			}
-			this.formatList += '|' + format.name;
+			this.formatList += `|${format.name}`;
 			let displayCode = 0;
 			if (format.team) displayCode |= 1;
 			if (format.searchShow) displayCode |= 2;
@@ -1472,8 +1480,9 @@ export class GlobalRoomState {
 			const ruleTable = Dex.formats.getRuleTable(format);
 			const level = ruleTable.adjustLevel || ruleTable.adjustLevelDown || ruleTable.maxLevel;
 			if (level === 50) displayCode |= 16;
-			 // 32 was previously used for Multi Battles
+			// 32 was previously used for Multi Battles
 			if (format.bestOfDefault) displayCode |= 64;
+			if (format.teraPreviewDefault) displayCode |= 128;
 			this.formatList += ',' + displayCode.toString(16);
 		}
 		return this.formatList;
@@ -1491,14 +1500,13 @@ export class GlobalRoomState {
 			if (!Config.groups[rank] || !rank) continue;
 
 			const tarGroup = Config.groups[rank];
-			let groupType = tarGroup.id === 'bot' || (!tarGroup.mute && !tarGroup.root) ?
+			const groupType = tarGroup.id === 'bot' || (!tarGroup.mute && !tarGroup.root) ?
 				'normal' : (tarGroup.root || tarGroup.declare) ? 'leadership' : 'staff';
-			if (tarGroup.id === 'sectionleader') groupType = 'staff';
 
 			rankList.push({
 				symbol: rank,
 				name: (Config.groups[rank].name || null),
-				type: groupType}); // send the first character in the rank, incase they put a string several characters long
+				type: groupType }); // send the first character in the rank, incase they put a string several characters long
 		}
 
 		const typeOrder = ['punishment', 'normal', 'staff', 'leadership'];
@@ -1507,7 +1515,7 @@ export class GlobalRoomState {
 
 		// add the punishment types at the very end.
 		for (const rank in Config.punishgroups) {
-			rankList.push({symbol: Config.punishgroups[rank].symbol, name: Config.punishgroups[rank].name, type: 'punishment'});
+			rankList.push({ symbol: Config.punishgroups[rank].symbol, name: Config.punishgroups[rank].name, type: 'punishment' });
 		}
 
 		Config.rankList = '|customgroups|' + JSON.stringify(rankList) + '\n';
@@ -1535,7 +1543,7 @@ export class GlobalRoomState {
 			rooms.push(room);
 		}
 
-		const roomTable: {[roomid: string]: BattleRoomTable} = {};
+		const roomTable: { [roomid: string]: BattleRoomTable } = {};
 		for (let i = rooms.length - 1; i >= rooms.length - 100 && i >= 0; i--) {
 			const room = rooms[i];
 			const roomData: BattleRoomTable = {};
@@ -1733,8 +1741,7 @@ export class GlobalRoomState {
 	startLockdown(err: Error | null = null, slow = false) {
 		if (this.lockdown && err) return;
 		const devRoom = Rooms.get('development');
-		// @ts-ignore
-		const stack = (err ? Utils.escapeHTML(err.stack).split(`\n`).slice(0, 2).join(`<br />`) : ``);
+		const stack = (err ? Utils.escapeHTML(err.stack!).split(`\n`).slice(0, 2).join(`<br />`) : ``);
 		for (const [id, curRoom] of Rooms.rooms) {
 			if (err) {
 				if (id === 'staff' || id === 'development' || (!devRoom && id === 'lobby')) {
@@ -1748,9 +1755,9 @@ export class GlobalRoomState {
 				curRoom.addRaw(`<div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`).update();
 			}
 			const game = curRoom.game;
-			// @ts-ignore TODO: revisit when game.timer is standardized
-			if (!slow && game && game.timer && typeof game.timer.start === 'function' && !game.ended) {
-				// @ts-ignore
+			// @ts-expect-error TODO: revisit when game.timer is standardized
+			if (!slow && game?.timer && typeof game.timer.start === 'function' && !game.ended) {
+				// @ts-expect-error see above
 				game.timer.start();
 				if (curRoom.settings.modchat !== '+') {
 					curRoom.settings.modchat = '+';
@@ -1759,7 +1766,7 @@ export class GlobalRoomState {
 			}
 		}
 		for (const user of Users.users.values()) {
-			user.send(`|pm|&|${user.tempGroup}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
+			user.send(`|pm|~|${user.tempGroup}${user.name}|/raw <div class="broadcast-red"><b>The server is restarting soon.</b><br />Please finish your battles quickly. No new battles can be started until the server resets in a few minutes.</div>`);
 		}
 
 		this.lockdown = true;
@@ -1915,7 +1922,7 @@ export class GameRoom extends BasicRoom {
 		// console.log("NEW BATTLE");
 
 		this.tour = options.tour || null;
-		this.setParent((options as any).parent || (this.tour && this.tour.room) || null);
+		this.setParent((options as any).parent || this.tour?.room || null);
 
 		this.p1 = options.players?.[0]?.user || null;
 		this.p2 = options.players?.[1]?.user || null;
@@ -1944,7 +1951,7 @@ export class GameRoom extends BasicRoom {
 		if (!(user.id in this.game.playerTable)) return this.getLog();
 		return this.getLog(this.game.playerTable[user.id].num as 0);
 	}
-	update(excludeUser: User | null = null) {
+	override update(excludeUser: User | null = null) {
 		if (!this.log.broadcastBuffer.length) return;
 
 		if (this.userCount) {
@@ -1954,7 +1961,7 @@ export class GameRoom extends BasicRoom {
 
 		this.pokeExpireTimer();
 	}
-	pokeExpireTimer() {
+	override pokeExpireTimer() {
 		// empty rooms time out after ten minutes
 		if (!this.userCount) {
 			if (this.expireTimer) clearTimeout(this.expireTimer);
@@ -1967,19 +1974,17 @@ export class GameRoom extends BasicRoom {
 	requestModchat(user: User | null) {
 		if (!user) {
 			this.modchatUser = '';
-			return;
 		} else if (!this.modchatUser || this.modchatUser === user.id || this.auth.get(user.id) !== Users.PLAYER_SYMBOL) {
 			this.modchatUser = user.id;
-			return;
 		} else {
 			return "Modchat can only be changed by the user who turned it on, or by staff";
 		}
 	}
-	onConnect(user: User, connection: Connection) {
+	override onConnect(user: User, connection: Connection) {
 		this.sendUser(connection, '|init|battle\n|title|' + this.title + '\n' + this.getLogForUser(user));
 		this.game?.onConnect?.(user, connection);
 	}
-	onJoin(user: User, connection: Connection) {
+	override onJoin(user: User, connection: Connection) {
 		if (!user) return false; // ???
 		if (this.users[user.id]) return false;
 
@@ -2039,15 +2044,14 @@ export class GameRoom extends BasicRoom {
 		const log = this.getLog(hideDetails ? 0 : -1);
 		let rating: number | undefined;
 		if (battle.ended && this.rated) rating = this.rated;
-		let {id, password} = this.getReplayData();
+		let { id, password } = this.getReplayData();
 		const silent = options === 'forpunishment' || options === 'silent' || options === 'auto';
 		if (silent) connection = undefined;
 		const isPrivate = this.settings.isPrivate || this.hideReplay;
-		const hidden = options === 'forpunishment' || options === 'auto' ? 10 :
-			(this as any).unlistReplay ? 2 :
+		const hidden = options === 'auto' ? 10 :
+			options === 'forpunishment' || (this as any).unlistReplay ? 2 :
 			isPrivate ? 1 :
 			0;
-
 		if (isPrivate && hidden === 10) {
 			password = Replays.generatePassword();
 		}
@@ -2114,10 +2118,10 @@ export class GameRoom extends BasicRoom {
 	}
 
 	getReplayData() {
-		if (!this.roomid.endsWith('pw')) return {id: this.roomid.slice(7)};
+		if (!this.roomid.endsWith('pw')) return { id: this.roomid.slice(7), password: null };
 		const end = this.roomid.length - 2;
 		const lastHyphen = this.roomid.lastIndexOf('-', end);
-		return {id: this.roomid.slice(7, lastHyphen), password: this.roomid.slice(lastHyphen + 1, end)};
+		return { id: this.roomid.slice(7, lastHyphen), password: this.roomid.slice(lastHyphen + 1, end) };
 	}
 }
 

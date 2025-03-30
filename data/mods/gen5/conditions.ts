@@ -1,4 +1,4 @@
-export const Conditions: {[k: string]: ModdedConditionData} = {
+export const Conditions: import('../../../sim/dex-conditions').ModdedConditionDataTable = {
 	slp: {
 		inherit: true,
 		onSwitchIn(target) {
@@ -8,7 +8,7 @@ export const Conditions: {[k: string]: ModdedConditionData} = {
 	partiallytrapped: {
 		inherit: true,
 		onStart(pokemon, source) {
-			this.add('-activate', pokemon, 'move: ' + this.effectState.sourceEffect, '[of] ' + source);
+			this.add('-activate', pokemon, 'move: ' + this.effectState.sourceEffect, `[of] ${source}`);
 			this.effectState.boundDivisor = source.hasItem('bindingband') ? 8 : 16;
 		},
 		onResidual(pokemon) {
@@ -32,10 +32,9 @@ export const Conditions: {[k: string]: ModdedConditionData} = {
 			// However, just in case, use 1 if it is undefined.
 			const counter = this.effectState.counter || 1;
 			if (counter >= 256) {
-				// 2^32 - special-cased because Battle.random(n) can't handle n > 2^16 - 1
-				return (this.random() * 4294967296 < 1);
+				return this.randomChance(1, 2 ** 32);
 			}
-			this.debug("Success chance: " + Math.round(100 / counter) + "%");
+			this.debug(`Success chance: ${Math.round(100 / counter)}%`);
 			return this.randomChance(1, counter);
 		},
 		onRestart() {

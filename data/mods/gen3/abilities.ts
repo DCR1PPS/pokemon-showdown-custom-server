@@ -1,4 +1,4 @@
-export const Abilities: {[k: string]: ModdedAbilityData} = {
+export const Abilities: import('../../../sim/dex-abilities').ModdedAbilityDataTable = {
 	cutecharm: {
 		inherit: true,
 		onDamagingHit(damage, target, source, move) {
@@ -85,7 +85,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 				if (target.volatiles['substitute']) {
 					this.add('-immune', target);
 				} else {
-					this.boost({atk: -1}, target, pokemon, null, true);
+					this.boost({ atk: -1 }, target, pokemon, null, true);
 				}
 			}
 		},
@@ -98,7 +98,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 				return this.effectState.target;
 			}
 		},
-		flags: {breakable: 1},
+		flags: { breakable: 1 },
 		name: "Lightning Rod",
 		rating: 0,
 		num: 32,
@@ -178,12 +178,11 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 		inherit: true,
 		onUpdate() {},
 		onStart(pokemon) {
-			if (!pokemon.isStarted) return;
 			const target = pokemon.side.randomFoe();
 			if (!target || target.fainted) return;
 			const ability = target.getAbility();
 			if (pokemon.setAbility(ability)) {
-				this.add('-ability', pokemon, ability, '[from] ability: Trace', '[of] ' + target);
+				this.add('-ability', pokemon, ability, '[from] ability: Trace', `[of] ${target}`);
 			}
 		},
 		flags: {},
